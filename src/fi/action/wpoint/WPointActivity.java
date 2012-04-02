@@ -29,8 +29,9 @@ public class WPointActivity extends MapActivity {
         Spot spotOverlay = new Spot(drawable, this);
         
         // test
-        GeoPoint point = new GeoPoint(19240000,-99120000);
-        OverlayItem overlayitem = new OverlayItem(point, "Hola, Mundo!", "I'm in Mexico City!");
+        // N+ E+, Helsinki about 60 15N 25 30E 
+        GeoPoint point = new GeoPoint(60150000,25030000);
+        OverlayItem overlayitem = new OverlayItem(point, "Morjes!", "Helsinki City!");
         
         // load spots
         spotOverlay.add(overlayitem);
