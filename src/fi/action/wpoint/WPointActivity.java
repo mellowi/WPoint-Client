@@ -18,6 +18,7 @@ import com.google.android.maps.OverlayItem;
 
 public class WPointActivity extends MapActivity {
 	private MapView map;
+	private LocationManager locationManager;
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -26,17 +27,13 @@ public class WPointActivity extends MapActivity {
         // layout
         setContentView(R.layout.main);
         
-        // GPS
-        LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-
-        while (!(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) && locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER))) {
+        // GPS & WiFi on?
+        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+        if (!(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) && locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER))) {
         	showDisabledAlertToUser();
         }
         
-
-        
-        
-        map = (MapView) findViewById(R.id.mapview);
+        map = (MapView) findViewById(R.id.MapView);
         
         // position Helsinki
         map.getController().setCenter(getPoint(60.17, 24.94));
@@ -52,7 +49,7 @@ public class WPointActivity extends MapActivity {
         // test
         // N+ E+, Helsinki about 60 15N 25 30E 
         GeoPoint point = getPoint(60.17, 24.94);
-        OverlayItem overlayitem = new OverlayItem(point, "Morjes!", "Helsinki City!");
+        OverlayItem overlayitem = new OverlayItem(point, "SSID: Tonnikalapurkki (50dB)", "[Connect]");
         
         // load spots
         spotOverlay.add(overlayitem);

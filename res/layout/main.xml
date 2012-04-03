@@ -1,16 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:orientation="vertical" >
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/MainLayout"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:gravity="bottom" >
 
-	<com.google.android.maps.MapView
-	    xmlns:android="http://schemas.android.com/apk/res/android"
-	    android:id="@+id/mapview"
+	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	    android:id="@+id/MapLayout"
+	    android:orientation="vertical"
 	    android:layout_width="fill_parent"
-	    android:layout_height="fill_parent"
-	    android:clickable="true"
-	    android:apiKey="0hswiX6ul9104IN1bfkAzCvm8MUSDNNwY5dGU9A"
-	/>
+	    android:layout_height="fill_parent">
+	
+	    <com.google.android.maps.MapView
+	        android:id="@+id/MapView"
+	        android:layout_width="fill_parent"
+	        android:layout_height="fill_parent"
+	        android:clickable="true"
+	        android:apiKey="0hswiX6ul9104IN1bfkAzCvm8MUSDNNwY5dGU9A"
+	    />
+		
+	</LinearLayout>
+	
+	<LinearLayout android:id="@+id/ButtonLayout"
+		android:layout_centerHorizontal="true"
+		android:layout_alignParentTop="true"
+		android:layout_width="wrap_content"
+		android:layout_height="fill_parent" 
+		android:layout_marginTop="5dp">
+		
+		<Button
+		    android:id="@+id/MapDetailsButton"
+		    android:layout_width="0dp"
+		    android:layout_height="wrap_content"
+		    android:layout_gravity="top"
+		    android:layout_weight="1.0"
+		    android:text="Scan now" >
 
-</LinearLayout>
+		</Button>
+	
+	</LinearLayout>
+</RelativeLayout>
