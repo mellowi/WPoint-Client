@@ -9,6 +9,12 @@ import android.graphics.drawable.Drawable;
 import android.location.LocationManager;
 import android.os.Bundle;
 
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
+
+import android.util.Log;
+
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapActivity;
 import com.google.android.maps.MapView;
@@ -22,6 +28,8 @@ public class WPointActivity extends MapActivity {
 	private MapView map;  
 	private MyLocationOverlay myLocation;
 	private LocationManager locationManager;
+    private Button scanButton;
+
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -59,8 +67,16 @@ public class WPointActivity extends MapActivity {
         spotOverlay.add(overlayitem);
         mapOverlays.add(spotOverlay);
         
+        // button
+        scanButton = (Button)findViewById(R.id.ButtonScan);
+        scanButton.setOnClickListener(new OnClickListener(){      
+            public void onClick(View v) {	
+    			Log.d("WPoint", "onClick() wifi.startScan()");
+    			//wifi.startScan();
+            }
+        });
     }
-    
+    	
     @Override
     public void onResume() {
       super.onResume();
