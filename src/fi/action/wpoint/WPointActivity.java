@@ -8,16 +8,19 @@ import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.widget.Toast;
 
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapActivity;
 import com.google.android.maps.MapView;
 import com.google.android.maps.Overlay;
 import com.google.android.maps.OverlayItem;
+import com.google.android.maps.MyLocationOverlay;
+
+
 
 public class WPointActivity extends MapActivity {
-	private MapView map;
+	private MapView map;  
+	private MyLocationOverlay myLocation;
 	private LocationManager locationManager;
 	
     @Override
@@ -51,11 +54,24 @@ public class WPointActivity extends MapActivity {
         GeoPoint point = getPoint(60.17, 24.94);
         OverlayItem overlayitem = new OverlayItem(point, "SSID: Tonnikalapurkki (50dB)", "[Connect]");
         
-        // load spots
+        // load spots    
+        myLocation = new MyLocationOverlay(this, map);
         spotOverlay.add(overlayitem);
         mapOverlays.add(spotOverlay);
         
     }
+    
+    @Override
+    public void onResume() {
+      super.onResume();
+      myLocation.enableCompass();
+    }
+    
+    @Override
+    public void onPause() {
+      super.onPause();
+      myLocation.disableCompass();
+    } 
     
     @Override
     protected boolean isRouteDisplayed() {
