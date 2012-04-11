@@ -3,10 +3,16 @@ package fi.action.wpoint;
 import java.util.List;
 
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.drawable.Drawable;
 import android.location.LocationManager;
+import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 
 import android.view.View;
@@ -30,6 +36,8 @@ public class WPointActivity extends MapActivity {
 	private LocationManager locationManager;
     private Button scanButton;
 
+	WifiManager wifi;
+	BroadcastReceiver receiver;
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -37,20 +45,35 @@ public class WPointActivity extends MapActivity {
         
         // layout
         setContentView(R.layout.main);
-        
-        // GPS & WiFi on?
+        map = (MapView) findViewById(R.id.MapView);
+        map.setBuiltInZoomControls(true); // zooming
+
+        // GPS & WiFi on? - not working properly (needs to check in some kind of listener)
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         if (!(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) && locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER))) {
         	showDisabledAlertToUser();
         }
-        
-        map = (MapView) findViewById(R.id.MapView);
+
+        /// WIFI THINGS (still under dev)
+		// Setup WiFi
+		wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+		// Get WiFi status
+		WifiInfo info = wifi.getConnectionInfo();
+		Log.d("WPoint", "WiFi Status: " + info.toString());
+		// List available networks (empty on emulator?)
+		List<WifiConfiguration> configs = wifi.getConfiguredNetworks();
+		for (WifiConfiguration config : configs) {
+			Log.d("WPoint", config.toString());
+		}
+		// Register Broadcast Receiver
+		if (receiver == null)
+			receiver = new ScanReceiver(this);
+		registerReceiver(receiver, new IntentFilter(
+				WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
         
         // position Helsinki
         map.getController().setCenter(getPoint(60.17, 24.94));
         map.getController().setZoom(13);
-        
-        map.setBuiltInZoomControls(true); // zooming
                 
         // spots
         List<Overlay> mapOverlays = map.getOverlays();
@@ -72,7 +95,7 @@ public class WPointActivity extends MapActivity {
         scanButton.setOnClickListener(new OnClickListener(){      
             public void onClick(View v) {	
     			Log.d("WPoint", "onClick() wifi.startScan()");
-    			//wifi.startScan();
+    			wifi.startScan();
             }
         });
     }
@@ -88,7 +111,12 @@ public class WPointActivity extends MapActivity {
       super.onPause();
       myLocation.disableCompass();
     } 
-    
+
+	@Override
+	public void onStop() {
+		unregisterReceiver(receiver);
+	}
+
     @Override
     protected boolean isRouteDisplayed() {
         return false;
