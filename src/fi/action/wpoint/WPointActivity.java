@@ -50,11 +50,9 @@ public class WPointActivity extends MapActivity {
 
         // GPS & WiFi on? - not working properly (needs to check in some kind of listener)
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-        checkPreconditions();
+		wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
 
         /// WIFI THINGS (still under dev)
-		// Setup WiFi
-		wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
 		// Get WiFi status
 		WifiInfo info = wifi.getConnectionInfo();
 		Log.d("WPoint", "WiFi Status: " + info.toString());
@@ -83,7 +81,7 @@ public class WPointActivity extends MapActivity {
         // test
         // N+ E+, Helsinki about 60 15N 25 30E 
         GeoPoint point = getPoint(60.17, 24.94);
-        OverlayItem overlayitem = new OverlayItem(point, "SSID: Tonnikalapurkki (50dB)", "[Connect]");
+        OverlayItem overlayitem = new OverlayItem(point, "SSID: Tonnikalapurkki (50dB)", "");
         
         // load spots    
         myLocation = new MyLocationOverlay(this, map);
@@ -103,7 +101,6 @@ public class WPointActivity extends MapActivity {
     @Override
     public void onResume() {
     	super.onResume();
-      	checkPreconditions();
       	myLocation.enableCompass();
 		if (receiver == null) 
 		{
@@ -111,6 +108,7 @@ public class WPointActivity extends MapActivity {
 			registerReceiver(receiver, new IntentFilter(
 				WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
 		}
+      	checkPreconditions();
     }
     
     @Override
@@ -142,16 +140,23 @@ public class WPointActivity extends MapActivity {
     }
     
     private void checkPreconditions() {
-        if (!(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) && locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER))) {
-        	showDisabledAlertToUser();
-        }
+    	// WiFi (tested - cant be on with emulator)
+    	/*
+    	if(!wifi.isWifiEnabled())
+    	{
+    		showWiFiDisabledAlertToUser();
+    		return;
+    	}
+    	*/
+    	if(!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER))
+        	showGPSDisabledAlertToUser();
     }
     
-	private void showDisabledAlertToUser() {
+	private void showGPSDisabledAlertToUser() {
 		AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
-		alertDialogBuilder.setMessage("GPS or/and WiFi are disabled in your device. Would you like to enable it?")
+		alertDialogBuilder.setMessage(R.string.gps_disabled)
 		.setCancelable(false)
-		.setPositiveButton("Goto Settings Page",
+		.setPositiveButton(R.string.goto_settings,
 		new DialogInterface.OnClickListener(){
 			public void onClick(DialogInterface dialog, int id){
 				Intent callGPSSettingIntent = new Intent(
@@ -159,7 +164,30 @@ public class WPointActivity extends MapActivity {
 				startActivity(callGPSSettingIntent);
 			}
 		});
-		alertDialogBuilder.setNegativeButton("Exit",
+		alertDialogBuilder.setNegativeButton(R.string.exit,
+		new DialogInterface.OnClickListener(){
+			public void onClick(DialogInterface dialog, int id) {
+				dialog.cancel();
+				System.exit(0);
+			}
+		});
+		AlertDialog alert = alertDialogBuilder.create();
+		alert.show();
+	}
+
+	private void showWiFiDisabledAlertToUser() {
+		AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+		alertDialogBuilder.setMessage(R.string.wifi_disabled)
+		.setCancelable(false)
+		.setPositiveButton(R.string.goto_settings,
+		new DialogInterface.OnClickListener(){
+			public void onClick(DialogInterface dialog, int id){
+				Intent callGPSSettingIntent = new Intent(
+				android.provider.Settings.ACTION_WIRELESS_SETTINGS);
+				startActivity(callGPSSettingIntent);
+			}
+		});
+		alertDialogBuilder.setNegativeButton(R.string.exit,
 		new DialogInterface.OnClickListener(){
 			public void onClick(DialogInterface dialog, int id) {
 				dialog.cancel();
