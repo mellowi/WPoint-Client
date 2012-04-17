@@ -50,9 +50,7 @@ public class WPointActivity extends MapActivity {
 
         // GPS & WiFi on? - not working properly (needs to check in some kind of listener)
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-        if (!(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) && locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER))) {
-        	showDisabledAlertToUser();
-        }
+        checkPreconditions();
 
         /// WIFI THINGS (still under dev)
 		// Setup WiFi
@@ -103,6 +101,7 @@ public class WPointActivity extends MapActivity {
     @Override
     public void onResume() {
       super.onResume();
+      checkPreconditions();
       myLocation.enableCompass();
     }
     
@@ -115,6 +114,7 @@ public class WPointActivity extends MapActivity {
 	@Override
 	public void onStop() {
 		unregisterReceiver(receiver);
+		super.onStop();
 	}
 
     @Override
@@ -124,6 +124,12 @@ public class WPointActivity extends MapActivity {
     
     private GeoPoint getPoint(double lat, double lon) {
         return (new GeoPoint((int) (lat * 1000000.0), (int) (lon * 1000000.0)));
+    }
+    
+    private void checkPreconditions() {
+        if (!(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) && locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER))) {
+        	showDisabledAlertToUser();
+        }
     }
     
 	private void showDisabledAlertToUser() {
