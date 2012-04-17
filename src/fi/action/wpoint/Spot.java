@@ -11,7 +11,7 @@ import com.google.android.maps.ItemizedOverlay;
 import com.google.android.maps.OverlayItem;
 
 // handles all the overlay items (spots) of the map view 
-public class Spot extends ItemizedOverlay {
+public class Spot extends ItemizedOverlay<OverlayItem> {
 	private ArrayList<OverlayItem> spots = new ArrayList<OverlayItem>();
 	private Context context;
 	
