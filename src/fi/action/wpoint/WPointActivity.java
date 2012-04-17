@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.drawable.Drawable;
 import android.location.LocationManager;
+import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
@@ -36,7 +37,7 @@ public class WPointActivity extends MapActivity {
 	private LocationManager locationManager;
     private Button scanButton;
 
-	WifiManager wifi;
+	WifiManager wifiManager;
 	BroadcastReceiver receiver;
 	
 	
@@ -51,14 +52,14 @@ public class WPointActivity extends MapActivity {
 
         // GPS & WiFi on? - not working properly (needs to check in some kind of listener)
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-		wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+		wifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
 
         /// WIFI THINGS (still under dev)
 		// Get WiFi status
-		WifiInfo info = wifi.getConnectionInfo();
+		WifiInfo info = wifiManager.getConnectionInfo();
 		Log.d("WPoint", "WiFi Status: " + info.toString());
 		// List available networks (empty on emulator?)
-		List<WifiConfiguration> configs = wifi.getConfiguredNetworks();
+		List<WifiConfiguration> configs = wifiManager.getConfiguredNetworks();
 		for (WifiConfiguration config : configs) {
 			Log.d("WPoint", config.toString());
 		}
@@ -103,7 +104,7 @@ public class WPointActivity extends MapActivity {
         scanButton.setOnClickListener(new OnClickListener(){      
             public void onClick(View v) {	
     			Log.d("WPoint", "onClick() wifi.startScan()");
-    			wifi.startScan();
+    			wifiManager.startScan();
             }
         });
     }
