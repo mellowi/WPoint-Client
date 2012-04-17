@@ -3,4 +3,8 @@
     <string name="app_name">WPoint</string>
     <string name="scan">Scan now</string>
     <string name="connect">Connect</string>
+    <string name="gps_disabled">GPS is disabled in your device. Would you like to enable it?</string>
+    <string name="wifi_disabled">WiFi is disabled in your device. Would you like to enable it?</string>
+    <string name="goto_settings">Go to Settings Page</string>
+    <string name="exit">Exit</string>
 </resources>
