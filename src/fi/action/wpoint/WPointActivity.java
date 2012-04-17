@@ -69,7 +69,12 @@ public class WPointActivity extends MapActivity {
 				WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
 		}
 		
-        // position Helsinki
+        // Show current location indicator
+		MyLocationOverlay myLocationOverlay = new MyLocationOverlay(this, map);
+		myLocationOverlay.enableMyLocation();
+		map.getOverlays().add(myLocationOverlay);
+		
+		// TODO: Center to the location
         map.getController().setCenter(getPoint(60.17, 24.94));
         map.getController().setZoom(13);
                 
