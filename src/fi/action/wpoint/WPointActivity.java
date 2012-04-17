@@ -23,7 +23,6 @@ import android.util.Log;
 
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapActivity;
-import com.google.android.maps.MapController;
 import com.google.android.maps.MapView;
 import com.google.android.maps.Overlay;
 import com.google.android.maps.OverlayItem;
@@ -112,15 +111,9 @@ public class WPointActivity extends MapActivity {
     @Override
     public void onResume() {
     	super.onResume();
-<<<<<<< HEAD
-      	checkPreconditions();
       	myLocationOverlay.enableCompass();
       	myLocationOverlay.enableMyLocation();
-=======
-      	myLocation.enableCompass();
->>>>>>> 6b8b2b14a9ced0dff586ee3856b353eda87c7067
-		if (receiver == null) 
-		{
+		if (receiver == null) {
 			receiver = new ScanReceiver(this);
 			registerReceiver(receiver, new IntentFilter(
 				WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
@@ -132,6 +125,7 @@ public class WPointActivity extends MapActivity {
     public void onPause() {
     	super.onPause();
     	myLocationOverlay.disableCompass();
+        myLocationOverlay.disableMyLocation();
     	if (receiver != null) {
     	    unregisterReceiver(receiver);
     	    receiver = null;
