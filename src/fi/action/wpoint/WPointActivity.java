@@ -64,11 +64,13 @@ public class WPointActivity extends MapActivity {
 			Log.d("WPoint", config.toString());
 		}
 		// Register Broadcast Receiver
-		if (receiver == null)
+		if (receiver == null) 
+		{
 			receiver = new ScanReceiver(this);
-		registerReceiver(receiver, new IntentFilter(
+			registerReceiver(receiver, new IntentFilter(
 				WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
-        
+		}
+		
         // position Helsinki
         map.getController().setCenter(getPoint(60.17, 24.94));
         map.getController().setZoom(13);
@@ -100,21 +102,34 @@ public class WPointActivity extends MapActivity {
     	
     @Override
     public void onResume() {
-      super.onResume();
-      checkPreconditions();
-      myLocation.enableCompass();
+    	super.onResume();
+      	checkPreconditions();
+      	myLocation.enableCompass();
+		if (receiver == null) 
+		{
+			receiver = new ScanReceiver(this);
+			registerReceiver(receiver, new IntentFilter(
+				WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
+		}
     }
     
     @Override
     public void onPause() {
-      super.onPause();
-      myLocation.disableCompass();
+    	super.onPause();
+    	myLocation.disableCompass();
+    	if (receiver != null) {
+    	    unregisterReceiver(receiver);
+    	    receiver = null;
+    	}
     } 
 
 	@Override
 	public void onStop() {
-		unregisterReceiver(receiver);
 		super.onStop();
+    	if (receiver != null) {
+    	    unregisterReceiver(receiver);
+    	    receiver = null;
+    	}
 	}
 
     @Override
