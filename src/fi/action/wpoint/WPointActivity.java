@@ -23,6 +23,7 @@ import android.util.Log;
 
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapActivity;
+import com.google.android.maps.MapController;
 import com.google.android.maps.MapView;
 import com.google.android.maps.Overlay;
 import com.google.android.maps.OverlayItem;
@@ -31,13 +32,14 @@ import com.google.android.maps.MyLocationOverlay;
 
 
 public class WPointActivity extends MapActivity {
-	private MapView map;  
-	private MyLocationOverlay myLocation;
+	private MapView map;
+	private MyLocationOverlay myLocationOverlay;
 	private LocationManager locationManager;
     private Button scanButton;
 
 	WifiManager wifi;
 	BroadcastReceiver receiver;
+	
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -72,14 +74,19 @@ public class WPointActivity extends MapActivity {
 		}
 		
         // Show current location indicator
-		MyLocationOverlay myLocationOverlay = new MyLocationOverlay(this, map);
+		myLocationOverlay = new MyLocationOverlay(this, map);
 		myLocationOverlay.enableMyLocation();
 		map.getOverlays().add(myLocationOverlay);
 		
-		// TODO: Center to the location
-        map.getController().setCenter(getPoint(60.17, 24.94));
-        map.getController().setZoom(13);
-                
+        map.getController().setZoom(19);
+		
+		// Center the map to the user's location
+		myLocationOverlay.runOnFirstFix(new Runnable() {
+            public void run() {
+                map.getController().animateTo(myLocationOverlay.getMyLocation());
+            }
+        });
+        
         // spots
         List<Overlay> mapOverlays = map.getOverlays();
         Drawable drawable = this.getResources().getDrawable(R.drawable.blue_dot);
@@ -91,7 +98,6 @@ public class WPointActivity extends MapActivity {
         OverlayItem overlayitem = new OverlayItem(point, "SSID: Tonnikalapurkki (50dB)", "[Connect]");
         
         // load spots    
-        myLocation = new MyLocationOverlay(this, map);
         spotOverlay.add(overlayitem);
         mapOverlays.add(spotOverlay);
         
@@ -109,7 +115,8 @@ public class WPointActivity extends MapActivity {
     public void onResume() {
     	super.onResume();
       	checkPreconditions();
-      	myLocation.enableCompass();
+      	myLocationOverlay.enableCompass();
+      	myLocationOverlay.enableMyLocation();
 		if (receiver == null) 
 		{
 			receiver = new ScanReceiver(this);
@@ -121,7 +128,7 @@ public class WPointActivity extends MapActivity {
     @Override
     public void onPause() {
     	super.onPause();
-    	myLocation.disableCompass();
+    	myLocationOverlay.disableCompass();
     	if (receiver != null) {
     	    unregisterReceiver(receiver);
     	    receiver = null;
