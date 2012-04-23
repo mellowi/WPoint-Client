@@ -4,8 +4,7 @@
     <string name="scan">Scan now</string>
     <string name="ssid">SSID: </string>
     <string name="connect">Connect</string>
-    <string name="gps_disabled">GPS is disabled in your device. Would you like to enable it?</string>
-    <string name="wifi_disabled">WiFi is disabled in your device. Would you like to enable it?</string>
-    <string name="goto_settings">Go to Settings Page</string>
-    <string name="exit">Exit</string>
+    <string name="gps_disabled">GPS seems to disabled. Please go to settings and enable it.</string>
+    <string name="goto_settings">Go to settings</string>
+    <string name="exit">Quit WPoint</string>
 </resources>

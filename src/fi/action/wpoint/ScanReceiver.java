@@ -34,7 +34,7 @@ public class ScanReceiver extends BroadcastReceiver {
         String message = String.format("%s networks found. %s is the strongest.", results.size(), bestHotspot.SSID);
         Log.d("WPoint", "onReceive() message: " + message);
         if (bestHotspot != null) { 
-            connectToDialog(bestHotspot.SSID);
+            //connectToDialog(bestHotspot.SSID);
         }
     }
 

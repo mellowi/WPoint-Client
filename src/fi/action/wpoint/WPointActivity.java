@@ -28,24 +28,21 @@ import com.google.android.maps.MyLocationOverlay;
 
 public class WPointActivity extends MapActivity implements LocationListener {
     private MapView           mapView;
-    private MyLocationOverlay myLocationOverlay;
+    private MyLocationOverlay locationOverlay;
     private LocationManager   locationManager;
     private Button            scanButton;
     private MapController     mapController;
     public  WifiManager       wifiManager;
     public  BroadcastReceiver scanReceiver;
+    boolean originalWifiState;
 
     
-    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         // Wifi
         wifiManager = (WifiManager)getSystemService(Context.WIFI_SERVICE);
-        if (scanReceiver == null) {
-            scanReceiver = new ScanReceiver(this);
-            registerReceiver(scanReceiver, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
-        }
+        originalWifiState = wifiManager.isWifiEnabled();
         
         // Map view
         setContentView(R.layout.main);
@@ -59,9 +56,8 @@ public class WPointActivity extends MapActivity implements LocationListener {
         locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 10000, 30, this);
         
         // Current location indicator
-        myLocationOverlay = new MyLocationOverlay(this, mapView);
-        myLocationOverlay.enableMyLocation();
-        mapOverlays.add(myLocationOverlay);
+        locationOverlay = new MyLocationOverlay(this, mapView);
+        mapOverlays.add(locationOverlay);
         mapController.setZoom(19);
         
         // TODO: Read hotspots via JSON API
@@ -94,19 +90,25 @@ public class WPointActivity extends MapActivity implements LocationListener {
    
     public void onResume() {
         super.onResume();
-        myLocationOverlay.enableCompass();
-        myLocationOverlay.enableMyLocation();
+        if (!wifiManager.isWifiEnabled()) {
+            wifiManager.setWifiEnabled(true);
+        }
+        locationOverlay.enableCompass();
+        locationOverlay.enableMyLocation();
         if (scanReceiver == null) {
             scanReceiver = new ScanReceiver(this);
             registerReceiver(scanReceiver, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
         }
-        checkPreconditions();
+        if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            showGPSDisabledAlertToUser();
+        }
     }
 
     public void onPause() {
         super.onPause();
-        myLocationOverlay.disableCompass();
-        myLocationOverlay.disableMyLocation();
+        wifiManager.setWifiEnabled(originalWifiState);
+        locationOverlay.disableCompass();
+        locationOverlay.disableMyLocation();
         if (scanReceiver != null) {
             unregisterReceiver(scanReceiver);
             scanReceiver = null;
@@ -115,19 +117,10 @@ public class WPointActivity extends MapActivity implements LocationListener {
 
     public void onStop() {
         super.onStop();
+        wifiManager.setWifiEnabled(originalWifiState);
         if (scanReceiver != null) {
             unregisterReceiver(scanReceiver);
             scanReceiver = null;
-        }
-    }
-
-    private void checkPreconditions() {
-        if (!wifiManager.isWifiEnabled()) { 
-            showWiFiDisabledAlertToUser();
-            return;
-        }
-        if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-            showGPSDisabledAlertToUser();
         }
     }
 
@@ -153,29 +146,6 @@ public class WPointActivity extends MapActivity implements LocationListener {
         AlertDialog alert = alertDialogBuilder.create();
         alert.show();
     }
-
-    private void showWiFiDisabledAlertToUser() {
-        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
-        alertDialogBuilder.setMessage(R.string.wifi_disabled).setCancelable(false)
-            .setPositiveButton(R.string.goto_settings,
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        Intent callGPSSettingIntent = new Intent(android.provider.Settings.ACTION_WIRELESS_SETTINGS);
-                        startActivity(callGPSSettingIntent);
-                    }
-                }
-            );
-        alertDialogBuilder.setNegativeButton(R.string.exit,
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                dialog.cancel();
-                                System.exit(0);
-                            }
-                        }
-        );
-        AlertDialog alert = alertDialogBuilder.create();
-        alert.show();
-    }
     
     public void onLocationChanged(Location location) {
         int latitude = (int)(location.getLatitude() * 1E6);
@@ -193,7 +163,6 @@ public class WPointActivity extends MapActivity implements LocationListener {
     public void onProviderEnabled(String provider) {
         // TODO Auto-generated method stub
     }
-
 
     public void onStatusChanged(String provider, int status, Bundle extras) {
         // TODO Auto-generated method stub
