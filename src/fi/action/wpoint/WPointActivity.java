@@ -58,7 +58,7 @@ public class WPointActivity extends MapActivity implements LocationListener {
         // Current location indicator
         locationOverlay = new MyLocationOverlay(this, mapView);
         mapOverlays.add(locationOverlay);
-        mapController.setZoom(19);
+        mapController.setZoom(mapView.getMaxZoomLevel()-1);
         
         // TODO: Read hotspots via JSON API
         // ...
