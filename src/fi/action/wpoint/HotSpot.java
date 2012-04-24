@@ -9,13 +9,16 @@ import com.google.android.maps.ItemizedOverlay;
 import com.google.android.maps.OverlayItem;
 
 
-public class Spot extends ItemizedOverlay<OverlayItem> {
-    private ArrayList<OverlayItem> spots = new ArrayList<OverlayItem>();
+public class HotSpot extends ItemizedOverlay<OverlayItem> {
+    
+    private ArrayList<OverlayItem> spots;
     private Context                context;
 
-    public Spot(Drawable icon, Context context) {
+    
+    public HotSpot(Drawable icon, Context context) {
         super(boundCenterBottom(icon));
         this.context = context;
+        this.spots   = new ArrayList<OverlayItem>();
     }
 
     public void add(OverlayItem overlay) {
