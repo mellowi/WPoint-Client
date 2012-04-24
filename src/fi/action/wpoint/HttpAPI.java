@@ -36,7 +36,7 @@ public class HttpAPI {
 		HttpPost post = new HttpPost(url);
 
 		HttpParams params = new BasicHttpParams();
-		params.setParameter("data", json.toString());
+		params.setParameter("data", "homo");//json.toString());
 		post.setHeader(HTTP.CONTENT_TYPE, "application/json");
 		post.setParams(params);
 		

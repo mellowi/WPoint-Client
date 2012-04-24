@@ -1,6 +1,11 @@
 package fi.action.wpoint;
 
+import java.io.IOException;
 import java.util.List;
+
+import org.apache.http.client.ClientProtocolException;
+import org.json.JSONObject;
+
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -84,6 +89,21 @@ public class WPointActivity extends MapActivity implements LocationListener {
             public void onClick(View v) {
                 Log.d("WPoint", "onClick() wifi.startScan()");
                 wifiManager.startScan();
+                
+                // HTTP TEST
+                HttpAPI http = new HttpAPI();
+                String response2 = "empty";
+                String response = "empty";
+                try {
+        			response2 = http.get("http://google.fi");
+        			response = http.post("http://wpoint.herokuapp.com/api/v1/report.json", new JSONObject());
+        		} catch (ClientProtocolException e) {
+        			e.printStackTrace();
+        		} catch (IOException e) {
+        			e.printStackTrace();
+        		}
+                Log.d("WPoint", response);
+                
             }
         });
     }
