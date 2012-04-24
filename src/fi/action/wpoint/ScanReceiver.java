@@ -27,12 +27,25 @@ public class ScanReceiver extends BroadcastReceiver {
         List<ScanResult> results = wPoint.wifiManager.getScanResults();
 
         bestHotspot = null;
-
+        
+        if (wPoint.currentLocation != null) {
+            int observationLatitude = wPoint.currentLocation.getLatitudeE6();
+            int observationLongitude = wPoint.currentLocation.getLongitudeE6();
+        }
+        
         for (ScanResult result : results) {
-            Log.d("WPoint", result.SSID);
-                    
+            String ssid  = result.SSID;
+            String bssid = result.BSSID;
+            int rssi     = result.level;
+            boolean open = false;
+            
+            if (!result.capabilities.contains("WPA") && !result.capabilities.contains("WEP")) {
+                open = true;
+            }
+            
+            // TODO: Make JSON
+            
             // TODO: Send results via JSON API
-            // ...
             
             if (bestHotspot == null || WifiManager.compareSignalLevel(bestHotspot.level,result.level) < 0) {
                 bestHotspot = result;

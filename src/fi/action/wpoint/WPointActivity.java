@@ -34,6 +34,7 @@ public class WPointActivity extends MapActivity implements LocationListener {
     private MapController     mapController;
     public  WifiManager       wifiManager;
     public  BroadcastReceiver scanReceiver;
+    public  GeoPoint          currentLocation;
     boolean originalWifiState;
 
     
@@ -149,7 +150,7 @@ public class WPointActivity extends MapActivity implements LocationListener {
     public void onLocationChanged(Location location) {
         int latitude = (int)(location.getLatitude() * 1E6);
         int longitude = (int)(location.getLongitude() * 1E6);
-        GeoPoint currentLocation = new GeoPoint(latitude, longitude);
+        currentLocation = new GeoPoint(latitude, longitude);
         mapController.animateTo(currentLocation);
         mapView.invalidate();
     }
