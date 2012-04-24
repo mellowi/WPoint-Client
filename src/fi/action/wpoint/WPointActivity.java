@@ -53,7 +53,7 @@ public class WPointActivity extends MapActivity implements LocationListener {
 
         // Location manager
         locationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
-        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 10000, 30, this);
+        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 30000, 30, this);
         
         // Current location indicator
         locationOverlay = new MyLocationOverlay(this, mapView);
@@ -75,8 +75,7 @@ public class WPointActivity extends MapActivity implements LocationListener {
         // TODO: Scan hotspots every x minutes
         // ...
         
-        // TODO: Send results via JSON API
-        // ...
+
         
         // Scan button
         scanButton = (Button)findViewById(R.id.ButtonScan);

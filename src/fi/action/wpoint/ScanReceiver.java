@@ -25,12 +25,20 @@ public class ScanReceiver extends BroadcastReceiver {
     public void onReceive(Context c, Intent intent) {
         Log.d("WPoint", "onReceive()");
         List<ScanResult> results = wPoint.wifiManager.getScanResults();
+
         bestHotspot = null;
+
         for (ScanResult result : results) {
+            Log.d("WPoint", result.SSID);
+                    
+            // TODO: Send results via JSON API
+            // ...
+            
             if (bestHotspot == null || WifiManager.compareSignalLevel(bestHotspot.level,result.level) < 0) {
                 bestHotspot = result;
             }
         }
+        
         String message = String.format("%s networks found. %s is the strongest.", results.size(), bestHotspot.SSID);
         Log.d("WPoint", "onReceive() message: " + message);
         if (bestHotspot != null) { 
