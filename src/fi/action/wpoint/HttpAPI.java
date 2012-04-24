@@ -8,6 +8,7 @@ import java.io.InputStreamReader;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.BasicHttpParams;
@@ -26,7 +27,7 @@ public class HttpAPI {
 	}
 
 	public String get(String url) throws ClientProtocolException, IOException {
-		HttpPost get = new HttpPost(url);
+		HttpGet get = new HttpGet(url);
 		String response = responseToString(client.execute(get));
 		return response;
 	}
