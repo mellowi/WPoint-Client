@@ -49,7 +49,7 @@ public class HttpAPI {
 		
 		InputStream input = null;		
 		BufferedReader reader;
-		StringBuilder builder = new StringBuilder();;
+		StringBuilder builder = new StringBuilder();
 		try {
 			input = response.getEntity().getContent();
 			reader = new BufferedReader(new InputStreamReader(input));

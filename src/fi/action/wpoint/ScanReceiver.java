@@ -1,6 +1,13 @@
 package fi.action.wpoint;
 
+import java.io.IOException;
 import java.util.List;
+
+import org.apache.http.client.ClientProtocolException;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -28,29 +35,53 @@ public class ScanReceiver extends BroadcastReceiver {
 
         bestHotspot = null;
         
-        if (wPoint.currentLocation != null) {
-            int observationLatitude = wPoint.currentLocation.getLatitudeE6();
-            int observationLongitude = wPoint.currentLocation.getLongitudeE6();
-        }
+        
+        if (wPoint.currentLocation == null)
+        	return;
+        
+        JSONObject jsonData = new JSONObject();
+        JSONArray jsonResults = new JSONArray();
         
         for (ScanResult result : results) {
-            String ssid  = result.SSID;
-            String bssid = result.BSSID;
-            int rssi     = result.level;
+        	
             boolean open = false;
-            
             if (!result.capabilities.contains("WPA") && !result.capabilities.contains("WEP")) {
                 open = true;
             }
-            
-            // TODO: Make JSON
-            
-            // TODO: Send results via JSON API
+
+        	JSONObject jsonResult = new JSONObject();
+        	try {
+				jsonResult.put("ssid", result.SSID);
+	        	jsonResult.put("bssid", result.BSSID);
+	        	jsonResult.put("dbm", result.level);
+	            jsonResult.put("open", open);
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+            jsonResults.put(jsonResult);
             
             if (bestHotspot == null || WifiManager.compareSignalLevel(bestHotspot.level,result.level) < 0) {
                 bestHotspot = result;
             }
         }
+
+        try {
+            jsonData.put("latitude", wPoint.currentLocation.getLatitudeE6());
+    		jsonData.put("longitude", wPoint.currentLocation.getLongitudeE6());
+			jsonData.put("results", jsonResults);
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+
+        // TODO: Send results via JSON API
+        HttpAPI http = new HttpAPI();
+        try {
+			http.post("http://wpoint.herokuapp.com/api/v1/report.json", jsonData);
+		} catch (ClientProtocolException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
         
         String message = String.format("%s networks found. %s is the strongest.", results.size(), bestHotspot.SSID);
         Log.d("WPoint", "onReceive() message: " + message);
