@@ -4,18 +4,24 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 
 import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HTTP;
 import org.json.JSONObject;
+
+import android.util.Log;
 
 public class HttpAPI {
 	
@@ -34,12 +40,15 @@ public class HttpAPI {
 	
 	public String post(String url, JSONObject json) throws ClientProtocolException, IOException {
 		HttpPost post = new HttpPost(url);
-
-		HttpParams params = new BasicHttpParams();
-		params.setParameter("data", "homo");//json.toString());
-		post.setHeader(HTTP.CONTENT_TYPE, "application/json");
-		post.setParams(params);
 		
+		ArrayList<NameValuePair> postParameters = new ArrayList<NameValuePair>();
+		postParameters.add(new BasicNameValuePair("data", "trollol"));
+		UrlEncodedFormEntity formEntity = new UrlEncodedFormEntity(postParameters);
+		post.setEntity(formEntity);
+		post.setHeader(HTTP.CONTENT_TYPE, "application/json");
+		
+		Log.d("WPoint", post.getRequestLine().toString());
+		Log.d("WPoint", post.getParams().getParameter("data").toString());
 		String response = responseToString(client.execute(post));
 		return response;
 	}

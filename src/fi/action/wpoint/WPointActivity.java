@@ -103,6 +103,7 @@ public class WPointActivity extends MapActivity implements LocationListener {
         			e.printStackTrace();
         		}
                 Log.d("WPoint", response);
+                //Log.d("WPoint", response2);
                 
             }
         });
