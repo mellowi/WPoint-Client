@@ -9,10 +9,10 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicHeader;
+import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HTTP;
 import org.json.JSONObject;
 
@@ -33,11 +33,11 @@ public class HttpAPI {
 	
 	public String post(String url, JSONObject json) throws ClientProtocolException, IOException {
 		HttpPost post = new HttpPost(url);
-		
-		StringEntity entity = new StringEntity(json.toString());
-		entity.setContentEncoding(new BasicHeader(HTTP.CONTENT_TYPE,
-				"application/json"));
-		post.setEntity(entity);
+
+		HttpParams params = new BasicHttpParams();
+		params.setParameter("data", json.toString());
+		post.setHeader(HTTP.CONTENT_TYPE, "application/json");
+		post.setParams(params);
 		
 		String response = responseToString(client.execute(post));
 		return response;
