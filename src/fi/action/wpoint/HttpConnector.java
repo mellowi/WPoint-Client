@@ -17,38 +17,14 @@ import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 
 
-public class CustomHttpClient {
+public class HttpConnector {
     
     public static final int HTTP_TIMEOUT = 10000; // 10 seconds
     private static HttpClient mHttpClient;
 
     
-    /**
-     * Get our single instance of our HttpClient object.
-     *
-     * @return an HttpClient object with connection parameters set
-     */
-    private static HttpClient getHttpClient() {
-        if (mHttpClient == null) {
-            mHttpClient = new DefaultHttpClient();
-            final HttpParams params = mHttpClient.getParams();
-            HttpConnectionParams.setConnectionTimeout(params, HTTP_TIMEOUT);
-            HttpConnectionParams.setSoTimeout(params, HTTP_TIMEOUT);
-            ConnManagerParams.setTimeout(params, HTTP_TIMEOUT);
-        }
-        return mHttpClient;
-    }
-
-    /**
-     * Performs an HTTP Post request to the specified url with the
-     * specified parameters.
-     *
-     * @param url The web address to post the request to
-     * @param postParameters The parameters to send via the request
-     * @return The result of the request
-     * @throws Exception
-     */
-    public static String executeHttpPost(String url, ArrayList<NameValuePair> postParameters) throws Exception {
+    public static String executeHttpPost(String url, ArrayList<NameValuePair> postParameters)
+    throws Exception {
         BufferedReader in = null;
         try {
             HttpClient client = getHttpClient();
@@ -81,13 +57,6 @@ public class CustomHttpClient {
         }
     }
 
-    /**
-     * Performs an HTTP GET request to the specified url.
-     *
-     * @param url The web address to post the request to
-     * @return The result of the request
-     * @throws Exception
-     */
     public static String executeHttpGet(String url) throws Exception {
         BufferedReader in = null;
         try {
@@ -118,5 +87,16 @@ public class CustomHttpClient {
                 }
             }
         }
+    }
+    
+    private static HttpClient getHttpClient() {
+        if (mHttpClient == null) {
+            mHttpClient = new DefaultHttpClient();
+            final HttpParams params = mHttpClient.getParams();
+            HttpConnectionParams.setConnectionTimeout(params, HTTP_TIMEOUT);
+            HttpConnectionParams.setSoTimeout(params, HTTP_TIMEOUT);
+            ConnManagerParams.setTimeout(params, HTTP_TIMEOUT);
+        }
+        return mHttpClient;
     }
 }

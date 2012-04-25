@@ -9,18 +9,19 @@ import com.google.android.maps.ItemizedOverlay;
 import com.google.android.maps.OverlayItem;
 
 
-public class HotSpot extends ItemizedOverlay<OverlayItem> {
+public class HotspotsOverlay extends ItemizedOverlay<OverlayItem> {
     
     private ArrayList<OverlayItem> spots;
     private Context                context;
 
     
-    public HotSpot(Drawable icon, Context context) {
+    public HotspotsOverlay(Drawable icon, Context context) {
         super(boundCenterBottom(icon));
         this.context = context;
         this.spots   = new ArrayList<OverlayItem>();
     }
 
+    
     public void add(OverlayItem overlay) {
         spots.add(overlay);
         populate();
@@ -30,7 +31,7 @@ public class HotSpot extends ItemizedOverlay<OverlayItem> {
         OverlayItem item = spots.get(index);
         AlertDialog.Builder dialog = new AlertDialog.Builder(context);
         dialog.setTitle(item.getTitle());
-        // dialog.setMessage(item.getSnippet());
+        dialog.setMessage(item.getSnippet());
         dialog.setPositiveButton(R.string.connect,
             new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int which) {

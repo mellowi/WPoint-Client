@@ -1,46 +1,44 @@
 package fi.action.wpoint;
 
-import java.util.List;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.StrictMode;
-import android.util.Log;
-import android.view.View;
-import android.view.View.OnClickListener;
-import android.widget.Button;
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapActivity;
 import com.google.android.maps.MapView;
 import com.google.android.maps.MyLocationOverlay;
-import com.google.android.maps.Overlay;
+import com.google.android.maps.OverlayItem;
 
 
 public class WPointActivity extends MapActivity implements LocationListener {
 
-    public MapView            mapView;
-    private MyLocationOverlay myLocationOverlay;
-    private LocationManager   locationManager;
-    private Button            scanButton;
     public WifiManager        wifiManager;
-    public BroadcastReceiver  scanReceiver;
-    public List<Overlay>      mapOverlays;
     public double             currentLatitude;
     public double             currentLongitude;
-    boolean                   originalWifiState;
+    private MapView           mapView;
+    private MyLocationOverlay myLocationOverlay;
+    private LocationManager   locationManager;
+    private BroadcastReceiver scanReceiver;
+    private boolean           originalWifiState;
 
+    
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // HTTP requests should otherwise be run on separate thread (Honeycomb)
+        // HTTP requests should really be run on a separate thread
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
         
@@ -59,16 +57,6 @@ public class WPointActivity extends MapActivity implements LocationListener {
         
         // Location manager
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-
-        // Scan button
-        scanButton = (Button) findViewById(R.id.ButtonScan);
-        scanButton.setOnClickListener(new OnClickListener() {
-
-            public void onClick(View v) {
-                Log.d("WPoint", "onClick() wifi.startScan()");
-                wifiManager.startScan();
-            }
-        });
     }
 
     public void onResume() {
@@ -76,20 +64,26 @@ public class WPointActivity extends MapActivity implements LocationListener {
         if (!wifiManager.isWifiEnabled()) {
             wifiManager.setWifiEnabled(true);
         }
-        
         Location lastLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
         showLocation(lastLocation);
-        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 1, this);
+        locationManager.requestLocationUpdates(
+            LocationManager.NETWORK_PROVIDER,
+            1000,   // polling time in milliseconds
+            1,      // change required in meters
+            this
+        );
         myLocationOverlay.enableMyLocation();
         myLocationOverlay.runOnFirstFix(new Runnable() {
             public void run() {
               mapView.getController().setCenter(myLocationOverlay.getMyLocation());
             }
-          });
-        
+        });
         if (scanReceiver == null) {
             scanReceiver = new ScanReceiver(this);
-            registerReceiver(scanReceiver, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
+            registerReceiver(
+               scanReceiver,
+               new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)
+            );
         }
         if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             showGPSDisabledAlertToUser();
@@ -118,7 +112,8 @@ public class WPointActivity extends MapActivity implements LocationListener {
 
     private void showGPSDisabledAlertToUser() {
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
-        alertDialogBuilder.setMessage(R.string.gps_disabled)
+        alertDialogBuilder
+            .setMessage(R.string.gps_disabled)
             .setCancelable(false)
             .setPositiveButton(R.string.goto_settings,
                 new DialogInterface.OnClickListener() {
@@ -141,49 +136,68 @@ public class WPointActivity extends MapActivity implements LocationListener {
     }
     
     public void onLocationChanged(Location location) {
+        // Update user's current location on map
         showLocation(location);
         
-        String response = "";
+        // Send request to API
+        String response = null;
         try {
-            response = CustomHttpClient.executeHttpGet(
-               "http://wpoint.herokuapp.com/api/v1/spots.json?" + 
+            response = HttpConnector.executeHttpGet(
+                "http://wpoint.herokuapp.com/api/v1/spots.json?" + 
                 "latitude=" + location.getLatitude() +
-                "&longitude=" + location.getLongitude());
+                "&longitude=" + location.getLongitude()
+            );
         }
         catch (Exception e) {
+            // TODO: Display error message that failed to connect the server
             e.printStackTrace();
         }
-        
-        Log.d("WPoint", response);
 
-        // TODO: Parse data from response
-        // ...
+        // Set icon for hotspots
+        Drawable icon = getResources().getDrawable(R.drawable.blue_dot);
+        HotspotsOverlay spotOverlays = new HotspotsOverlay(icon, this);
         
-        // TODO: Draw hotspots on map
-        // ...
-        
-        /*
-        // Mock
-        GeoPoint hotspotLocation = new GeoPoint((int)(60.17*1E6), (int)(24.97*1E6));
-        OverlayItem overlayitem = new OverlayItem(hotspotLocation, "SSID: Tonnikalapurkki (50dB)", "");
-        
-        // Draw spots
-        Drawable drawable = wPoint.getResources().getDrawable(R.drawable.blue_dot);
-        HotSpot spotOverlay = new HotSpot(drawable, wPoint);
-        spotOverlay.add(overlayitem);
-        wPoint.mapOverlays.add(spotOverlay);*/
+        // Parse response JSON
+        try {
+            JSONArray array = new JSONArray(response);
+            
+            for (int i = 0; i < array.length(); i++) {
+                JSONObject hotspot = array.getJSONObject(i);
+                
+                if (!hotspot.getBoolean("open")) {
+                    continue;
+                }
+                JSONObject coordinates = hotspot.getJSONObject("location");
+                String ssid            = hotspot.getString("ssid");
+                Double latitude        = coordinates.getDouble("lat");
+                Double longitude       = coordinates.getDouble("lng");
+
+                GeoPoint hotspotLocation = new GeoPoint(
+                    (int)(latitude*1E6),
+                    (int)(longitude*1E6)
+                );
+                OverlayItem overlayitem = new OverlayItem(
+                    hotspotLocation,
+                    ssid,
+                    "signal: n dbm"
+                );
+                spotOverlays.add(overlayitem);
+            }
+            mapView.getOverlays().add(spotOverlays);
+        }
+        catch (JSONException e) {
+            // TODO: Display error message that failed to parse the response
+            e.printStackTrace();
+        }
     }
 
     public void onProviderDisabled(String provider) {
-        
     }
 
     public void onProviderEnabled(String provider) {
-        
     }
 
     public void onStatusChanged(String provider, int status, Bundle extras) {
-        
     }
 
     protected boolean isRouteDisplayed() {
@@ -196,6 +210,10 @@ public class WPointActivity extends MapActivity implements LocationListener {
         }
         currentLatitude = location.getLatitude();
         currentLongitude = location.getLongitude();
-        mapView.getController().animateTo(new GeoPoint((int)(currentLatitude * 1E6), (int)(currentLongitude * 1E6)));
+        GeoPoint currentLocationGeoPoint = new GeoPoint(
+            (int)(currentLatitude * 1E6),
+            (int)(currentLongitude * 1E6)
+        );
+        mapView.getController().animateTo(currentLocationGeoPoint);
     }
 }

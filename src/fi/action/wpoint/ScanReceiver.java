@@ -14,6 +14,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WifiManager;
 import android.util.Log;
 
 
@@ -23,16 +24,16 @@ public class ScanReceiver extends BroadcastReceiver {
     private ScanResult       bestHotspot;
     private List<ScanResult> scanResults;
 
+    
     public ScanReceiver(WPointActivity wPoint) {
         super();
         this.wPoint      = wPoint;
         this.bestHotspot = null;
     }
 
+    
     public void onReceive(Context c, Intent intent) {
-        Log.d("WPoint", "onReceive()");
-        
-        //bestHotspot = null;
+        bestHotspot = null;
  
         scanResults = wPoint.wifiManager.getScanResults();
         if (scanResults.size() == 0) {
@@ -40,35 +41,29 @@ public class ScanReceiver extends BroadcastReceiver {
         }
         
         JSONObject jsonPayload = new JSONObject();
-        JSONArray jsonResultsArray = new JSONArray();
-
-        for (ScanResult result : scanResults) {
-            boolean isOpen = false;
-            if (!result.capabilities.contains("WPA") &&
-                !result.capabilities.contains("WEP")) {
-                isOpen = true;
-            }
-
-            JSONObject jsonHotspotHash = new JSONObject();
-            try {
+        try {
+            JSONArray jsonResultsArray = new JSONArray();
+            for (ScanResult result : scanResults) {
+                boolean isOpen = false;
+                if (!result.capabilities.contains("WPA") &&
+                    !result.capabilities.contains("WEP")) {
+                    isOpen = true;
+                }
+    
+                JSONObject jsonHotspotHash = new JSONObject();
                 jsonHotspotHash.put("ssid",  result.SSID);
                 jsonHotspotHash.put("bssid", result.BSSID);
                 jsonHotspotHash.put("dbm",   result.level);
                 jsonHotspotHash.put("open",  isOpen);
+                jsonResultsArray.put(jsonHotspotHash);
+    
+                // decide the best
+                if (bestHotspot == null ||
+                    WifiManager.compareSignalLevel(bestHotspot.level, result.level) < 0) {
+                    bestHotspot = result;
+                }
             }
-            catch (JSONException e) {
-                e.printStackTrace();
-            }
-            
-            jsonResultsArray.put(jsonHotspotHash);
 
-            /*if (bestHotspot == null ||
-                WifiManager.compareSignalLevel(bestHotspot.level, result.level) < 0) {
-                bestHotspot = result;
-            }*/
-        }
-
-        try {
             jsonPayload.put("latitude", wPoint.currentLatitude);
             jsonPayload.put("longitude", wPoint.currentLongitude);
             jsonPayload.put("results", jsonResultsArray);
@@ -77,26 +72,23 @@ public class ScanReceiver extends BroadcastReceiver {
             e.printStackTrace();
         }
 
-        Log.d("WPoint", jsonPayload.toString());
-        
+        Log.d("WPoint", "Sending: " + jsonPayload.toString());
         ArrayList<NameValuePair> postParameters = new ArrayList<NameValuePair>();
         postParameters.add(new BasicNameValuePair("data", jsonPayload.toString()));
         String response = null;
         try {
-           response = CustomHttpClient.executeHttpPost(
+           response = HttpConnector.executeHttpPost(
                            "http://wpoint.herokuapp.com/api/v1/report.json",
-                           postParameters);
+                           postParameters
+                      );
         }
         catch (Exception e) {
+            // TODO: Try again n times
             e.printStackTrace();
         }
         
-        Log.d("WPoint", response);
+        Log.d("WPoint", "Received: " + response);
         
-        /*String message = String.format(
-                        "%s networks found. %s is the strongest.",
-                        scanResults.size(), bestHotspot.SSID);
-        Log.d("WPoint", "onReceive(): " + message);*/
         if (bestHotspot != null) {
             // connectToDialog(bestHotspot.SSID);
         }
@@ -114,10 +106,8 @@ public class ScanReceiver extends BroadcastReceiver {
         WifiConf.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.TKIP);
         WifiConf.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
         WifiConf.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
-        WifiConf.allowedPairwiseCiphers
-                        .set(WifiConfiguration.PairwiseCipher.TKIP);
-        WifiConf.allowedPairwiseCiphers
-                        .set(WifiConfiguration.PairwiseCipher.CCMP);
+        WifiConf.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.TKIP);
+        WifiConf.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
         int res = wPoint.wifiManager.addNetwork(WifiConf);
         Log.d("WPoint WIFI", "add Network returned " + res);
         boolean b = wPoint.wifiManager.enableNetwork(res, true);
@@ -127,19 +117,16 @@ public class ScanReceiver extends BroadcastReceiver {
     public void connectToDialog(String hotspot) {
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(wPoint);
         alertDialogBuilder
-                        .setMessage(R.string.ssid + hotspot)
-                        .setCancelable(true)
-                        .setPositiveButton(R.string.connect,
-                                        new DialogInterface.OnClickListener() {
-
-                                            public void onClick(
-                                                            DialogInterface dialog,
-                                                            int id) {
-                                                connectToBest();
-                                            }
-                                        });
+            .setMessage(R.string.ssid + hotspot)
+            .setCancelable(true)
+            .setPositiveButton(R.string.connect,
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog,int id) {
+                        connectToBest();
+                    }
+                }
+            );
         AlertDialog alert = alertDialogBuilder.create();
         alert.show();
     }
-
 }
