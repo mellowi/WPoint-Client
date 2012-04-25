@@ -32,7 +32,7 @@ import com.google.android.maps.OverlayItem;
 
 public class WPointActivity extends MapActivity implements LocationListener {
 
-    public static final int SCAN_INTERVAL_SECONDS = 10;
+    public static final int SCAN_INTERVAL_SECONDS = 30;
     public static final int SCAN_WHEN_MOVED_METERS = 10;
     
     public WifiManager        wifiManager;
@@ -113,7 +113,7 @@ public class WPointActivity extends MapActivity implements LocationListener {
         }
         locationManager.requestLocationUpdates(
             LocationManager.NETWORK_PROVIDER,
-            SCAN_INTERVAL_SECONDS * 10000,
+            SCAN_INTERVAL_SECONDS * 1000,
             SCAN_WHEN_MOVED_METERS,
             this
         );
@@ -124,7 +124,7 @@ public class WPointActivity extends MapActivity implements LocationListener {
         else {
             locationManager.requestLocationUpdates(
                             LocationManager.GPS_PROVIDER,
-                            SCAN_INTERVAL_SECONDS * 10000,
+                            SCAN_INTERVAL_SECONDS * 1000,
                             SCAN_WHEN_MOVED_METERS, 
                             this
              );
