@@ -18,7 +18,14 @@
 	        android:clickable="true"
 	        android:apiKey="0hswiX6ul9104IN1bfkAzCvm8MUSDNNwY5dGU9A"
 	    />
-		
+	    
+		<TextView
+		    android:id="@+id/lblWaiting"
+		    android:textSize="15pt"
+			android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+			android:text="@string/waiting"
+		 />
 	</LinearLayout>
 	
 	<LinearLayout android:id="@+id/ButtonLayout"

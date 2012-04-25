@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">WPoint</string>
+    <string name="waiting">Getting location</string>
+    <string name="scanning">Scanning&#8230;</string>
     <string name="scan">Scan now</string>
     <string name="ssid">SSID: </string>
     <string name="connect">Connect</string>
     <string name="gps_disabled">GPS seems to disabled. Please go to settings and enable it.</string>
     <string name="goto_settings">Go to settings</string>
-    <string name="exit">Quit WPoint</string>
+    <string name="exit">Quit</string>
 </resources>

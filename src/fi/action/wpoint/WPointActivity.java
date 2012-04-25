@@ -4,6 +4,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -16,6 +17,11 @@ import android.location.LocationManager;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.StrictMode;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.widget.Toast;
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapActivity;
 import com.google.android.maps.MapView;
@@ -26,18 +32,25 @@ import com.google.android.maps.OverlayItem;
 public class WPointActivity extends MapActivity implements LocationListener {
 
     public WifiManager        wifiManager;
-    public double             currentLatitude;
-    public double             currentLongitude;
+    public Location           currentLocation;
     private MapView           mapView;
     private MyLocationOverlay myLocationOverlay;
     private LocationManager   locationManager;
     private BroadcastReceiver scanReceiver;
     private boolean           originalWifiState;
+    private ProgressDialog dialog;
 
+    
     
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // UI
+        setContentView(R.layout.main);
+        dialog = new ProgressDialog(this);
+        dialog.setMessage(getResources().getString(R.string.waiting));
+        dialog.show();
+        
         // HTTP requests should really be run on a separate thread
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
@@ -47,7 +60,6 @@ public class WPointActivity extends MapActivity implements LocationListener {
         originalWifiState = wifiManager.isWifiEnabled();
 
         // Map view
-        setContentView(R.layout.main);
         mapView = (MapView) findViewById(R.id.MapView);
         mapView.setBuiltInZoomControls(true);
         mapView.getController().setZoom(mapView.getMaxZoomLevel()-1);
@@ -56,16 +68,38 @@ public class WPointActivity extends MapActivity implements LocationListener {
         mapView.postInvalidate();
         
         // Location manager
+        currentLocation = null;
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
     }
 
+    public boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.layout.menu, menu);
+        return true;
+    }
+    
+    public boolean onOptionsItemSelected(MenuItem item)  {
+        switch (item.getItemId()) {
+            case R.id.scan:
+                Toast.makeText(this, R.string.scanning , Toast.LENGTH_LONG).show();
+                wifiManager.startScan();
+                return true;
+            case R.id.exit:
+                finish();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+    
     public void onResume() {
         super.onResume();
         if (!wifiManager.isWifiEnabled()) {
             wifiManager.setWifiEnabled(true);
         }
-        Location lastLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-        showLocation(lastLocation);
+        currentLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        showLocation(currentLocation);
         locationManager.requestLocationUpdates(
             LocationManager.NETWORK_PROVIDER,
             1000,   // polling time in milliseconds
@@ -73,11 +107,6 @@ public class WPointActivity extends MapActivity implements LocationListener {
             this
         );
         myLocationOverlay.enableMyLocation();
-        myLocationOverlay.runOnFirstFix(new Runnable() {
-            public void run() {
-              mapView.getController().setCenter(myLocationOverlay.getMyLocation());
-            }
-        });
         if (scanReceiver == null) {
             scanReceiver = new ScanReceiver(this);
             registerReceiver(
@@ -136,6 +165,10 @@ public class WPointActivity extends MapActivity implements LocationListener {
     }
     
     public void onLocationChanged(Location location) {
+        Log.d("WPoint", "Updating location.");
+        dialog.hide();
+        currentLocation = location;
+        
         // Update user's current location on map
         showLocation(location);
         
@@ -208,8 +241,8 @@ public class WPointActivity extends MapActivity implements LocationListener {
         if (location == null) {
             return;
         }
-        currentLatitude = location.getLatitude();
-        currentLongitude = location.getLongitude();
+        double currentLatitude = location.getLatitude();
+        double currentLongitude = location.getLongitude();
         GeoPoint currentLocationGeoPoint = new GeoPoint(
             (int)(currentLatitude * 1E6),
             (int)(currentLongitude * 1E6)

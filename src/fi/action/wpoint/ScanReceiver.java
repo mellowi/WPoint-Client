@@ -33,6 +33,10 @@ public class ScanReceiver extends BroadcastReceiver {
 
     
     public void onReceive(Context c, Intent intent) {
+        if (wPoint.currentLocation == null) {
+            return;
+        }
+        
         bestHotspot = null;
  
         scanResults = wPoint.wifiManager.getScanResults();
@@ -60,12 +64,14 @@ public class ScanReceiver extends BroadcastReceiver {
                 // decide the best
                 if (bestHotspot == null ||
                     WifiManager.compareSignalLevel(bestHotspot.level, result.level) < 0) {
-                    bestHotspot = result;
+                    if (isOpen) {
+                        bestHotspot = result;
+                    }
                 }
             }
 
-            jsonPayload.put("latitude", wPoint.currentLatitude);
-            jsonPayload.put("longitude", wPoint.currentLongitude);
+            jsonPayload.put("latitude", wPoint.currentLocation.getLatitude());
+            jsonPayload.put("longitude", wPoint.currentLocation.getLongitude());
             jsonPayload.put("results", jsonResultsArray);
         }
         catch (JSONException e) {
@@ -90,7 +96,7 @@ public class ScanReceiver extends BroadcastReceiver {
         Log.d("WPoint", "Received: " + response);
         
         if (bestHotspot != null) {
-            // connectToDialog(bestHotspot.SSID);
+            //connectToDialog(bestHotspot.SSID);
         }
     }
 
