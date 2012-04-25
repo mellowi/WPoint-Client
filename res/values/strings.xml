@@ -1,12 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">WPoint</string>
-    <string name="waiting">Waiting for location</string>
-    <string name="scanning">Scanning&#8230;</string>
-    <string name="scan">Scan now</string>
+    <string name="waiting">Getting your location, please wait.</string>
+    <string name="scanning">Now scanning&#8230;</string>
+
     <string name="ssid">SSID: </string>
     <string name="connect">Connect</string>
-    <string name="gps_disabled">GPS seems to disabled. Please go to settings and enable it.</string>
-    <string name="goto_settings">Go to settings</string>
-    <string name="exit">Quit</string>
+    
+    <string name="dialog_title">GPS seems to be disabled</string>
+    <string name="dialog_gps_disabled">For better results outdoors, please enable it.</string>
+    <string name="dialog_settings_button">Go to settings to enable GPS</string>
+    <string name="dialog_ignore_button">Ignore</string>
+    
+    <string name="menu_scan">Scan now</string>
+    <string name="menu_exit">Quit</string>
+    
+    <string name="error_connecting_server">Error connecting to the server. It might be temporary down.</string>
+    <string name="error_formatting_results">Error formatting results to JSON.</string>
+    <string name="error_parsing_hotspots">Error parsing hotspots from JSON.</string>
+    <string name="error_invalid_response">Invalid response from server.</string>
 </resources>

@@ -2,6 +2,7 @@ package fi.action.wpoint;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.http.HttpException;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONArray;
@@ -16,6 +17,7 @@ import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.util.Log;
+import android.widget.Toast;
 
 
 public class ScanReceiver extends BroadcastReceiver {
@@ -75,25 +77,32 @@ public class ScanReceiver extends BroadcastReceiver {
             jsonPayload.put("results", jsonResultsArray);
         }
         catch (JSONException e) {
+            Toast.makeText(wPoint, R.string.error_formatting_results, Toast.LENGTH_LONG).show();
             e.printStackTrace();
+            return;
         }
 
-        Log.d("WPoint", "Sending: " + jsonPayload.toString());
         ArrayList<NameValuePair> postParameters = new ArrayList<NameValuePair>();
         postParameters.add(new BasicNameValuePair("data", jsonPayload.toString()));
-        String response = null;
+        
         try {
-           response = HttpConnector.executeHttpPost(
-                           "http://wpoint.herokuapp.com/api/v1/report.json",
-                           postParameters
-                      );
+           HttpConnector.executeHttpPost(
+               "http://wpoint.herokuapp.com/api/v1/report.json",
+               postParameters
+          );
+        }
+        catch (HttpException e) {
+            Toast.makeText(wPoint, R.string.error_invalid_response + " " + e.getMessage(),
+                           Toast.LENGTH_LONG).show();
+            e.printStackTrace();
+            return;
         }
         catch (Exception e) {
-            // TODO: Try again n times
+            Toast.makeText(wPoint, R.string.error_connecting_server,
+                           Toast.LENGTH_LONG).show();
             e.printStackTrace();
+            return;
         }
-        
-        Log.d("WPoint", "Received: " + response);
         
         if (bestHotspot != null) {
             //connectToDialog(bestHotspot.SSID);
