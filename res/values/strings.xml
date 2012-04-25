@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">WPoint</string>
-    <string name="waiting">Getting location</string>
+    <string name="waiting">Waiting for location</string>
     <string name="scanning">Scanning&#8230;</string>
     <string name="scan">Scan now</string>
     <string name="ssid">SSID: </string>

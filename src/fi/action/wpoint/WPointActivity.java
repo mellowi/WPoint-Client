@@ -98,12 +98,12 @@ public class WPointActivity extends MapActivity implements LocationListener {
         if (!wifiManager.isWifiEnabled()) {
             wifiManager.setWifiEnabled(true);
         }
-        currentLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-        showLocation(currentLocation);
+        //currentLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        //showLocation(currentLocation);
         locationManager.requestLocationUpdates(
             LocationManager.NETWORK_PROVIDER,
-            1000,   // polling time in milliseconds
-            1,      // change required in meters
+            10000,   // polling time in milliseconds
+            10,      // change required in meters
             this
         );
         myLocationOverlay.enableMyLocation();
